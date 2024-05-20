@@ -1,45 +1,16 @@
 from abc import ABC, abstractmethod
 
+from typing import List, Dict
+from common.event import Event
 
 class EventStore:
     def __init__(self):
-        self.events = []
+        self.events: Dict[str, List[Event]] = {}
 
-    def save(self, event):
-        self.events.append(event)
+    def append(self, aggregate_id: str, event: Event):
+        if aggregate_id not in self.events:
+            self.events[aggregate_id] = []
+        self.events[aggregate_id].append(event)
 
-    def get_all(self):
-        return self.events
-
-
-
-#event abstraction
-# accountCreatedEvent inherits from Event
-
-#command abstraction
-# createAccountCommand inherits from Command
-
-#readmodel abstraction
-# accountDetails inherits from ReadModel
-
-
-class Event(ABC):
-    def __init__(self, data):
-        self.data = data
-
-    @abstractmethod
-    def apply(self, model):
-        pass
-
-
-class Command(ABC):
-    @abstractmethod
-    def execute(self):
-        pass
-
-class ReadModel:
-    def __init__(self):
-        self.state = {}
-
-    def apply(self, event):
-        event.apply(self.state)
+    def get_events(self, aggregate_id: str) -> List[Event]:
+        return self.events.get(aggregate_id, [])

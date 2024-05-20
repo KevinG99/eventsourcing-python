@@ -16,7 +16,7 @@ aggregate.apply(event)
 readmodel.apply(event)
 
 
-command = CreateUserCommand("John")
+command = CreateUserCommand("Johne")
 event = command.execute(aggregate)
 eventstore.save(event)
 readmodel.apply(event)
