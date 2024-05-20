@@ -11,8 +11,7 @@ from datetime import datetime
 class ItemDecider(Decider):
     def decide(self, command: Command) -> List[Event]:
         if isinstance(command, CreateItem):
-            item_id = str(uuid.uuid4())
-            return [ItemCreated(item_id, command.name)]
+            return [ItemCreated(command.item_id, command.name)]
         elif isinstance(command, ModifyItem):
             modification_time = datetime.utcnow().isoformat()
             return [

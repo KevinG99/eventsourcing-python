@@ -5,7 +5,6 @@ from features.itemDecider import ItemDecider
 from features.itemReadmodel import ItemReadModel
 from features.analytics.analyticsReadmodel import AnalyticsReadModel
 import uuid
-
 # Initialize components
 event_store = EventStore()
 decider = ItemDecider()
@@ -13,7 +12,8 @@ read_model = ItemReadModel()
 analytics_read_model = AnalyticsReadModel()
 
 # Handle a command to create an item
-create_command = CreateItem(name="Sample Item")
+firstItemId = str(uuid.uuid4())
+create_command = CreateItem(item_id=firstItemId, name="Sample Item")
 create_events = decider.decide(create_command)
 
 # Store events for creating an item
@@ -27,7 +27,7 @@ read_model.project(events)
 analytics_read_model.project(events)
 
 # Handle a command to modify the item
-modify_command = ModifyItem(item_id=list(read_model.items.keys())[0], new_name="Modified Item")
+modify_command = ModifyItem(item_id=firstItemId, new_name="Modified Item")
 modify_events = decider.decide(modify_command)
 
 # Store events for modifying an item
@@ -35,6 +35,19 @@ for event in modify_events:
     event_store.append(aggregate_id, event)
 
 # Project events to read models after modification
+events = event_store.get_events(aggregate_id)
+read_model.project(events)
+analytics_read_model.project(events)
+
+# Modify the item again
+another_modify_command = ModifyItem(item_id=firstItemId, new_name="Another Modified Name")
+another_modify_events = decider.decide(another_modify_command)
+
+# Store events for the second modification
+for event in another_modify_events:
+    event_store.append(aggregate_id, event)
+
+# Project events to read models after the second modification
 events = event_store.get_events(aggregate_id)
 read_model.project(events)
 analytics_read_model.project(events)
