@@ -3,12 +3,14 @@ from features.createItem import CreateItem
 from features.modifyItem import ModifyItem
 from features.itemDecider import ItemDecider
 from features.itemReadmodel import ItemReadModel
+from features.analytics.analyticsReadmodel import AnalyticsReadModel
 import uuid
 
 # Initialize components
 event_store = EventStore()
 decider = ItemDecider()
 read_model = ItemReadModel()
+analytics_read_model = AnalyticsReadModel()
 
 # Handle a command to create an item
 create_command = CreateItem(name="Sample Item")
@@ -22,6 +24,7 @@ for event in create_events:
 # Project events to read models after creation
 events = event_store.get_events(aggregate_id)
 read_model.project(events)
+analytics_read_model.project(events)
 
 # Handle a command to modify the item
 modify_command = ModifyItem(item_id=list(read_model.items.keys())[0], new_name="Modified Item")
@@ -34,6 +37,10 @@ for event in modify_events:
 # Project events to read models after modification
 events = event_store.get_events(aggregate_id)
 read_model.project(events)
+analytics_read_model.project(events)
 
 # Access read models
 print("Item Names:", read_model.items)
+print("Modification Analytics:", analytics_read_model.modifications)
+print("Modification Count:", analytics_read_model.get_modification_count(list(read_model.items.keys())[0]))
+print("Modification History:", analytics_read_model.get_modification_history(list(read_model.items.keys())[0]))
